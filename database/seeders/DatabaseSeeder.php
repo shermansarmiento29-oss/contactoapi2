@@ -3,23 +3,30 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Contact;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
+        // Crear un usuario fijo para pruebas manuales
+        $testUser = User::factory()->create([
+            'name' => 'Usuario Prueba',
             'email' => 'test@example.com',
+            'password' => bcrypt('password123'),
         ]);
+
+        // Crear entre 3 y 8 contactos para el usuario de prueba
+        Contact::factory(rand(3, 8))->create([
+            'user_id' => $testUser->id,
+        ]);
+
+        // Crear 4 usuarios adicionales con sus propios contactos
+        User::factory(4)->create()->each(function ($user) {
+            Contact::factory(rand(3, 8))->create([
+                'user_id' => $user->id,
+            ]);
+        });
     }
 }

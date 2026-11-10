@@ -23,4 +23,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
     });
 
+    // Rutas protegidas que requieren Token (Sanctum)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::get('/users/me', [AuthController::class, 'me']); // <- Nueva ruta
+    });
+
 });

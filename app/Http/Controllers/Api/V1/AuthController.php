@@ -53,4 +53,19 @@ class AuthController extends Controller
         // Retorna respuesta vacía con código 204 (No Content)
         return response()->noContent();
     }
+
+    /**
+     * Obtener los datos del usuario autenticado
+     */
+    public function me(Request $request)
+    {
+        return response()->json([
+            'user' => [
+                'id' => $request->user()->id,
+                'name' => $request->user()->name,
+                'email' => $request->user()->email,
+                'created_at' => $request->user()->created_at,
+            ]
+        ], 200);
+    }
 }

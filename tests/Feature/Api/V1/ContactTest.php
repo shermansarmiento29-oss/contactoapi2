@@ -16,12 +16,12 @@ class ContactTest extends TestCase
         $response = $this->getJson('/api/v1/contacts');
 
         $response->assertStatus(401)
-                 ->assertJson([
-                     'error' => [
-                         'status' => 401,
-                         'code' => 'UNAUTHORIZED',
-                     ]
-                 ]);
+            ->assertJson([
+                'error' => [
+                    'status' => 401,
+                    'code' => 'UNAUTHORIZED',
+                ],
+            ]);
     }
 
     public function test_authenticated_user_can_list_only_their_own_contacts(): void
@@ -33,10 +33,10 @@ class ContactTest extends TestCase
         Contact::factory(2)->create(['user_id' => $user2->id]);
 
         $response = $this->actingAs($user1, 'sanctum')
-                         ->getJson('/api/v1/contacts');
+            ->getJson('/api/v1/contacts');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(3, 'data');
+            ->assertJsonCount(3, 'data');
     }
 
     public function test_authenticated_user_can_create_a_contact(): void
@@ -50,10 +50,10 @@ class ContactTest extends TestCase
         ];
 
         $response = $this->actingAs($user, 'sanctum')
-                         ->postJson('/api/v1/contacts', $payload);
+            ->postJson('/api/v1/contacts', $payload);
 
         $response->assertStatus(201)
-                 ->assertJsonPath('data.name', 'Carlos Mendoza');
+            ->assertJsonPath('data.name', 'Carlos Mendoza');
 
         $this->assertDatabaseHas('contacts', [
             'user_id' => $user->id,
@@ -69,12 +69,12 @@ class ContactTest extends TestCase
         $contactUser2 = Contact::factory()->create(['user_id' => $user2->id]);
 
         $responseShow = $this->actingAs($user1, 'sanctum')
-                             ->getJson("/api/v1/contacts/{$contactUser2->id}");
+            ->getJson("/api/v1/contacts/{$contactUser2->id}");
 
         $responseShow->assertStatus(404);
 
         $responseDelete = $this->actingAs($user1, 'sanctum')
-                               ->deleteJson("/api/v1/contacts/{$contactUser2->id}");
+            ->deleteJson("/api/v1/contacts/{$contactUser2->id}");
 
         $responseDelete->assertStatus(404);
     }
@@ -85,7 +85,7 @@ class ContactTest extends TestCase
         $contact = Contact::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user, 'sanctum')
-                         ->deleteJson("/api/v1/contacts/{$contact->id}");
+            ->deleteJson("/api/v1/contacts/{$contact->id}");
 
         $response->assertStatus(200);
 

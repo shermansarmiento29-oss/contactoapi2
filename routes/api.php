@@ -1,12 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ContactController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    
+
     // Endpoint de salud (Health Check)
     Route::get('/health', function () {
         return response()->json([

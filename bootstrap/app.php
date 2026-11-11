@@ -1,11 +1,11 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Auth\AuthenticationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,17 +18,17 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        
+
         $exceptions->respond(function ($response, Throwable $e, Request $request) {
-            
+
             // Interceptar error 401 (Token ausente o inválido)
             if ($e instanceof AuthenticationException && $request->is('api/*')) {
                 return response()->json([
                     'error' => [
                         'status' => 401,
                         'code' => 'UNAUTHORIZED',
-                        'message' => 'Token de autenticación ausente o inválido.'
-                    ]
+                        'message' => 'Token de autenticación ausente o inválido.',
+                    ],
                 ], 401);
             }
 
@@ -38,12 +38,12 @@ return Application::configure(basePath: dirname(__DIR__))
                     'error' => [
                         'status' => 404,
                         'code' => 'RESOURCE_NOT_FOUND',
-                        'message' => 'El recurso solicitado no existe o fue eliminado.'
-                    ]
+                        'message' => 'El recurso solicitado no existe o fue eliminado.',
+                    ],
                 ], 404);
             }
 
             return $response;
         });
-        
+
     })->create();

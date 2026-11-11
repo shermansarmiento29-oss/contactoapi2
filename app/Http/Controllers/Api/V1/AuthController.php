@@ -20,13 +20,13 @@ class AuthController extends Controller
         ]);
 
         // Intentar autenticar con las credenciales
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (! Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'error' => [
                     'status' => 422,
                     'code' => 'INVALID_CREDENTIALS',
-                    'message' => 'Las credenciales proporcionadas son incorrectas.'
-                ]
+                    'message' => 'Las credenciales proporcionadas son incorrectas.',
+                ],
             ], 422);
         }
 
@@ -38,7 +38,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
             'token' => $token,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
         ], 200);
     }
 
@@ -65,7 +65,7 @@ class AuthController extends Controller
                 'name' => $request->user()->name,
                 'email' => $request->user()->email,
                 'created_at' => $request->user()->created_at,
-            ]
+            ],
         ], 200);
     }
 }

@@ -63,11 +63,11 @@ class ContactController extends Controller
     public function destroy(Request $request, string|int $id)
     {
         $contact = $request->user()->contacts()->findOrFail($id);
-        
+
         $contact->delete();
 
         return response()->json([
-            'message' => 'Contacto eliminado correctamente'
+            'message' => 'Contacto eliminado correctamente',
         ], 200);
     }
 }

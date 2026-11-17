@@ -17,6 +17,8 @@ class Contact extends Model
         'name',
         'phone',
         'email',
+        'address',
+        'avatar',
     ];
 
     // Relación: Un contacto pertenece a un usuario

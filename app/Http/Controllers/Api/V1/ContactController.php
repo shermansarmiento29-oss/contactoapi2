@@ -7,25 +7,26 @@ use App\Http\Requests\Api\V1\StoreContactRequest;
 use App\Http\Requests\Api\V1\UpdateContactRequest;
 use App\Http\Resources\ContactResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ContactController extends Controller
 {
-    /**
-     * Listar todos los contactos del usuario autenticado
-     */
     public function index(Request $request)
     {
-        $contacts = $request->user()->contacts()->get();
+        $contacts = $request->user()->contacts()->latest()->paginate(15);
 
         return ContactResource::collection($contacts);
     }
 
-    /**
-     * Crear un nuevo contacto vinculado al usuario autenticado
-     */
     public function store(StoreContactRequest $request)
     {
-        $contact = $request->user()->contacts()->create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('avatar')) {
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $contact = $request->user()->contacts()->create($data);
 
         return (new ContactResource($contact))
             ->additional(['message' => 'Contacto creado exitosamente'])
@@ -33,10 +34,6 @@ class ContactController extends Controller
             ->setStatusCode(201);
     }
 
-    /**
-     * Obtener el detalle de un contacto propio
-     * Retorna HTTP 404 Not Found si el contacto no existe o pertenece a otro usuario
-     */
     public function show(Request $request, string|int $id)
     {
         $contact = $request->user()->contacts()->findOrFail($id);
@@ -44,22 +41,26 @@ class ContactController extends Controller
         return new ContactResource($contact);
     }
 
-    /**
-     * Actualizar la información de un contacto propio
-     */
     public function update(UpdateContactRequest $request, string|int $id)
     {
         $contact = $request->user()->contacts()->findOrFail($id);
+        $data = $request->validated();
 
-        $contact->update($request->validated());
+        if ($request->hasFile('avatar')) {
+            // Eliminar el avatar anterior si existe
+            if ($contact->avatar) {
+                Storage::disk('public')->delete($contact->avatar);
+            }
 
-        return new ContactResource($contact);
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $contact->update($data);
+
+        return (new ContactResource($contact))
+            ->additional(['message' => 'Contacto actualizado exitosamente']);
     }
 
-    /**
-     * Borrado lógico (Soft Delete) del contacto
-     * Asigna la fecha actual al campo deleted_at sin eliminar la fila de la BD
-     */
     public function destroy(Request $request, string|int $id)
     {
         $contact = $request->user()->contacts()->findOrFail($id);

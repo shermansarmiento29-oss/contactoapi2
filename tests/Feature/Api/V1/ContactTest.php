@@ -5,6 +5,8 @@ namespace Tests\Feature\Api\V1;
 use App\Models\Contact;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ContactTest extends TestCase
@@ -92,5 +94,45 @@ class ContactTest extends TestCase
         $this->assertSoftDeleted('contacts', [
             'id' => $contact->id,
         ]);
+    }
+
+    public function test_authenticated_user_can_upload_and_replace_contact_avatar(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $initialAvatar = UploadedFile::fake()->image('avatar1.jpg');
+
+        // 1. Crear contacto con imagen
+        $createResponse = $this->actingAs($user, 'sanctum')
+            ->postJson('/api/v1/contacts', [
+                'name' => 'Laura Gómez',
+                'address' => 'Calle 10 # 5-20',
+                'avatar' => $initialAvatar,
+            ]);
+
+        $createResponse->assertStatus(201)
+            ->assertJsonPath('data.address', 'Calle 10 # 5-20');
+
+        $contact = Contact::first();
+        $firstAvatarPath = $contact->avatar;
+
+        $this->assertNotNull($firstAvatarPath);
+        Storage::disk('public')->assertExists($firstAvatarPath);
+
+        // 2. Actualizar imagen (usando POST + _method=PUT)
+        $newAvatar = UploadedFile::fake()->image('avatar2.png');
+
+        $updateResponse = $this->actingAs($user, 'sanctum')
+            ->postJson("/api/v1/contacts/{$contact->id}", [
+                '_method' => 'PUT',
+                'avatar' => $newAvatar,
+            ]);
+
+        $updateResponse->assertStatus(200);
+
+        $contact->refresh();
+        Storage::disk('public')->assertMissing($firstAvatarPath);
+        Storage::disk('public')->assertExists($contact->avatar);
     }
 }

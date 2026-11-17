@@ -5,36 +5,13 @@ use App\Http\Controllers\Api\V1\ContactController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    // Rutas públicas de autenticación
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 
-    // Endpoint de salud (Health Check)
-    Route::get('/health', function () {
-        return response()->json([
-            'status' => 'ok',
-            'service' => 'ContactoApi',
-            'timestamp' => now()->toIso8601String(),
-        ], 200);
-    });
-
-    // Rutas públicas de Autenticación
-    Route::post('/auth/login', [AuthController::class, 'login']);
-
-    // Rutas protegidas que requieren Token (Sanctum)
+    // Rutas protegidas con Sanctum
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/auth/logout', [AuthController::class, 'logout']);
-    });
-
-    // Rutas protegidas que requieren Token (Sanctum)
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/auth/logout', [AuthController::class, 'logout']);
-        Route::get('/users/me', [AuthController::class, 'me']); // <- Nueva ruta
-    });
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/auth/logout', [AuthController::class, 'logout']);
-        Route::get('/users/me', [AuthController::class, 'me']);
-
-        // CRUD completo de Contactos
+        Route::post('/logout', [AuthController::class, 'logout']);
         Route::apiResource('contacts', ContactController::class);
     });
-
 });

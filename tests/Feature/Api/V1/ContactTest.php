@@ -13,7 +13,7 @@ class ContactTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_unauthenticated_users_cannot_access_contacts_endpoints(): void
+    public function test_usuarios_no_autenticados_no_pueden_acceder_a_los_endpoints_de_contactos(): void
     {
         $response = $this->getJson('/api/v1/contacts');
 
@@ -26,7 +26,7 @@ class ContactTest extends TestCase
             ]);
     }
 
-    public function test_authenticated_user_can_list_only_their_own_contacts(): void
+    public function test_usuario_autenticado_puede_listar_solo_sus_contactos(): void
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
@@ -41,7 +41,7 @@ class ContactTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
 
-    public function test_authenticated_user_can_create_a_contact(): void
+    public function test_usuario_autenticado_puede_crear_un_contacto(): void
     {
         $user = User::factory()->create();
 
@@ -63,7 +63,7 @@ class ContactTest extends TestCase
         ]);
     }
 
-    public function test_user_cannot_view_or_modify_contacts_of_another_user(): void
+    public function test_usuario_no_puede_ver_ni_modificar_contactos_de_otro_usuario(): void
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
@@ -81,7 +81,7 @@ class ContactTest extends TestCase
         $responseDelete->assertStatus(404);
     }
 
-    public function test_contact_deletion_performs_soft_delete(): void
+    public function test_la_eliminacion_de_contacto_realiza_un_borrado_suave(): void
     {
         $user = User::factory()->create();
         $contact = Contact::factory()->create(['user_id' => $user->id]);
@@ -96,7 +96,7 @@ class ContactTest extends TestCase
         ]);
     }
 
-    public function test_authenticated_user_can_upload_and_replace_contact_avatar(): void
+    public function test_usuario_autenticado_puede_subir_y_reemplazar_la_foto_del_contacto(): void
     {
         Storage::fake('public');
 

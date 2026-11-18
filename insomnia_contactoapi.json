@@ -1,0 +1,457 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-11-18T02:42:22.000Z",
+  "__export_source": "insomnia.desktop.app:v10.0.0",
+  "resources": [
+    {
+      "_id": "wrk_contactoapi",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "ContactoApi",
+      "description": "Colección de pruebas de ContactoApi (Laravel + Sanctum)",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_contactoapi",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://127.0.0.1:8000/api/v1",
+        "token": "{% response 'body', 'req_login', 'b64::JC50b2tlbg==::46b', 'never', 60 %}",
+        "token2": "{% response 'body', 'req_register2', 'b64::JC50b2tlbg==::46b', 'never', 60 %}",
+        "contact_id": 1
+      }
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_contactoapi",
+      "name": "1. Autenticación",
+      "metaSortKey": 0
+    },
+    {
+      "_id": "fld_perfil",
+      "_type": "request_group",
+      "parentId": "wrk_contactoapi",
+      "name": "2. Perfil",
+      "metaSortKey": 1
+    },
+    {
+      "_id": "fld_contactos",
+      "_type": "request_group",
+      "parentId": "wrk_contactoapi",
+      "name": "3. Contactos",
+      "metaSortKey": 2
+    },
+    {
+      "_id": "fld_errores",
+      "_type": "request_group",
+      "parentId": "wrk_contactoapi",
+      "name": "4. Errores (401 / 403 / 404)",
+      "metaSortKey": 3
+    },
+    {
+      "_id": "req_register",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Registrar usuario",
+      "method": "POST",
+      "url": "{{ _.base_url }}/register",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1,
+      "description": "Devuelve 201 con el usuario y su token. Si el correo ya existe devuelve 422.",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Sherman Sarmiento\",\n  \"email\": \"sherman@example.com\",\n  \"password\": \"password123\",\n  \"fecha\": \"2000-05-10\",\n  \"numero\": \"3001234567\"\n}"
+      }
+    },
+    {
+      "_id": "req_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login",
+      "method": "POST",
+      "url": "{{ _.base_url }}/login",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2,
+      "description": "Ejecútalo primero: la variable token del ambiente toma el token de esta respuesta.",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"sherman@example.com\",\n  \"password\": \"password123\"\n}"
+      }
+    },
+    {
+      "_id": "req_login_bad",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login con contraseña incorrecta (422)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/login",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3,
+      "description": "",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"sherman@example.com\",\n  \"password\": \"mala\"\n}"
+      }
+    },
+    {
+      "_id": "req_logout",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Logout (204)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/logout",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 4,
+      "description": "Revoca el token. Después vuelve a ejecutar Login para seguir probando.",
+      "body": {}
+    },
+    {
+      "_id": "req_profile",
+      "_type": "request",
+      "parentId": "fld_perfil",
+      "name": "Ver mi perfil",
+      "method": "GET",
+      "url": "{{ _.base_url }}/profile",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 5,
+      "description": "",
+      "body": {}
+    },
+    {
+      "_id": "req_list",
+      "_type": "request",
+      "parentId": "fld_contactos",
+      "name": "Listar mis contactos",
+      "method": "GET",
+      "url": "{{ _.base_url }}/contacts",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 6,
+      "description": "",
+      "body": {}
+    },
+    {
+      "_id": "req_create",
+      "_type": "request",
+      "parentId": "fld_contactos",
+      "name": "Crear contacto (JSON)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/contacts",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 7,
+      "description": "",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Carlos Mendoza\",\n  \"phone\": \"+573001234567\",\n  \"email\": \"carlos@example.com\",\n  \"address\": \"Calle 10 # 5-20\"\n}"
+      }
+    },
+    {
+      "_id": "req_create_avatar",
+      "_type": "request",
+      "parentId": "fld_contactos",
+      "name": "Crear contacto con avatar (multipart)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/contacts",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 8,
+      "description": "En el campo avatar elige una imagen jpg, png o webp de máximo 2 MB.",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "name": "name",
+            "value": "Laura Gómez"
+          },
+          {
+            "name": "phone",
+            "value": "3109876543"
+          },
+          {
+            "name": "email",
+            "value": "laura@example.com"
+          },
+          {
+            "name": "address",
+            "value": "Carrera 7 # 12-34"
+          },
+          {
+            "name": "avatar",
+            "type": "file",
+            "fileName": ""
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_show",
+      "_type": "request",
+      "parentId": "fld_contactos",
+      "name": "Ver contacto",
+      "method": "GET",
+      "url": "{{ _.base_url }}/contacts/{{ _.contact_id }}",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 9,
+      "description": "Cambia contact_id en el ambiente para ver otro contacto.",
+      "body": {}
+    },
+    {
+      "_id": "req_update",
+      "_type": "request",
+      "parentId": "fld_contactos",
+      "name": "Actualizar contacto (PUT JSON)",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/contacts/{{ _.contact_id }}",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 10,
+      "description": "",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Carlos Mendoza Ruiz\",\n  \"address\": \"Avenida 3 # 45-67\"\n}"
+      }
+    },
+    {
+      "_id": "req_update_avatar",
+      "_type": "request",
+      "parentId": "fld_contactos",
+      "name": "Cambiar avatar (POST + _method=PUT)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/contacts/{{ _.contact_id }}",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 11,
+      "description": "Los archivos solo se envían por POST, por eso se usa _method=PUT. Borra el avatar anterior.",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "name": "_method",
+            "value": "PUT"
+          },
+          {
+            "name": "avatar",
+            "type": "file",
+            "fileName": ""
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_delete",
+      "_type": "request",
+      "parentId": "fld_contactos",
+      "name": "Eliminar contacto (soft delete)",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/contacts/{{ _.contact_id }}",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 12,
+      "description": "",
+      "body": {}
+    },
+    {
+      "_id": "req_401",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "401 - Sin token",
+      "method": "GET",
+      "url": "{{ _.base_url }}/contacts",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 13,
+      "description": "",
+      "body": {}
+    },
+    {
+      "_id": "req_404",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "404 - Contacto inexistente",
+      "method": "GET",
+      "url": "{{ _.base_url }}/contacts/999999",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": 14,
+      "description": "",
+      "body": {}
+    },
+    {
+      "_id": "req_register2",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "Registrar segundo usuario (para el 403)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/register",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 15,
+      "description": "Crea otro usuario; la variable token2 toma su token.",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Otro Usuario\",\n  \"email\": \"otro@example.com\",\n  \"password\": \"password123\",\n  \"fecha\": \"1998-01-20\",\n  \"numero\": \"3150000000\"\n}"
+      }
+    },
+    {
+      "_id": "req_403",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "403 - Ver contacto de otro usuario",
+      "method": "GET",
+      "url": "{{ _.base_url }}/contacts/{{ _.contact_id }}",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token2 }}"
+      },
+      "metaSortKey": 16,
+      "description": "Usa el token del segundo usuario para pedir un contacto del primero.",
+      "body": {}
+    }
+  ]
+}

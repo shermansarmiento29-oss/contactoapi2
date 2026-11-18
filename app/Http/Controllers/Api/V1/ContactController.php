@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreContactRequest;
 use App\Http\Requests\Api\V1\UpdateContactRequest;
 use App\Http\Resources\ContactResource;
+use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -36,14 +37,14 @@ class ContactController extends Controller
 
     public function show(Request $request, string|int $id)
     {
-        $contact = $request->user()->contacts()->findOrFail($id);
+        $contact = $this->findOwnedContact($request, $id);
 
         return new ContactResource($contact);
     }
 
     public function update(UpdateContactRequest $request, string|int $id)
     {
-        $contact = $request->user()->contacts()->findOrFail($id);
+        $contact = $this->findOwnedContact($request, $id);
         $data = $request->validated();
 
         if ($request->hasFile('avatar')) {
@@ -63,12 +64,25 @@ class ContactController extends Controller
 
     public function destroy(Request $request, string|int $id)
     {
-        $contact = $request->user()->contacts()->findOrFail($id);
+        $contact = $this->findOwnedContact($request, $id);
 
         $contact->delete();
 
         return response()->json([
             'message' => 'Contacto eliminado correctamente',
         ], 200);
+    }
+
+    /**
+     * Busca el contacto y verifica que sea del usuario en sesión.
+     * 404 si no existe (o fue eliminado), 403 si es de otro usuario.
+     */
+    private function findOwnedContact(Request $request, string|int $id): Contact
+    {
+        $contact = Contact::findOrFail($id);
+
+        abort_if($contact->user()->isNot($request->user()), 403);
+
+        return $contact;
     }
 }

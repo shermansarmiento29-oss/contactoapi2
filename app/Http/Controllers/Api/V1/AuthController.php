@@ -3,11 +3,33 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\RegisterRequest;
+use App\Http\Resources\UserResource;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    /**
+     * Registrar un usuario nuevo y devolver su token
+     */
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        // La contraseña se encripta sola gracias al cast 'hashed' del modelo
+        $user = User::create($request->validated());
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Usuario registrado exitosamente',
+            'user' => new UserResource($user),
+            'token' => $token,
+            'token_type' => 'Bearer',
+        ], 201);
+    }
+
     /**
      * Iniciar sesión y generar token de Sanctum
      */
@@ -55,17 +77,10 @@ class AuthController extends Controller
     }
 
     /**
-     * Obtener los datos del usuario autenticado
+     * Ver el perfil del usuario autenticado
      */
-    public function me(Request $request)
+    public function profile(Request $request): UserResource
     {
-        return response()->json([
-            'user' => [
-                'id' => $request->user()->id,
-                'name' => $request->user()->name,
-                'email' => $request->user()->email,
-                'created_at' => $request->user()->created_at,
-            ],
-        ], 200);
+        return new UserResource($request->user());
     }
 }

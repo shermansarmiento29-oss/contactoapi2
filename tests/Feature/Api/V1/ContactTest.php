@@ -63,22 +63,83 @@ class ContactTest extends TestCase
         ]);
     }
 
-    public function test_usuario_no_puede_ver_ni_modificar_contactos_de_otro_usuario(): void
+    public function test_usuario_recibe_403_al_ver_un_contacto_de_otro_usuario(): void
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
 
         $contactUser2 = Contact::factory()->create(['user_id' => $user2->id]);
 
-        $responseShow = $this->actingAs($user1, 'sanctum')
+        $response = $this->actingAs($user1, 'sanctum')
             ->getJson("/api/v1/contacts/{$contactUser2->id}");
 
-        $responseShow->assertStatus(404);
+        $response->assertStatus(403)
+            ->assertJson([
+                'error' => [
+                    'status' => 403,
+                    'code' => 'FORBIDDEN',
+                    'message' => 'usted no tiene los permisos necesarios para ver este recurso',
+                ],
+            ]);
+    }
 
-        $responseDelete = $this->actingAs($user1, 'sanctum')
-            ->deleteJson("/api/v1/contacts/{$contactUser2->id}");
+    public function test_usuario_recibe_403_al_editar_o_eliminar_un_contacto_de_otro_usuario(): void
+    {
+        $user1 = User::factory()->create();
+        $contactUser2 = Contact::factory()->create();
 
-        $responseDelete->assertStatus(404);
+        $this->actingAs($user1, 'sanctum')
+            ->putJson("/api/v1/contacts/{$contactUser2->id}", ['name' => 'Hackeado'])
+            ->assertStatus(403);
+
+        $this->actingAs($user1, 'sanctum')
+            ->deleteJson("/api/v1/contacts/{$contactUser2->id}")
+            ->assertStatus(403);
+
+        $this->assertNotSoftDeleted('contacts', ['id' => $contactUser2->id]);
+    }
+
+    public function test_contacto_inexistente_devuelve_404(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->getJson('/api/v1/contacts/9999');
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'error' => [
+                    'status' => 404,
+                    'code' => 'NOT_FOUND',
+                    'message' => 'recurso no encontrado',
+                ],
+            ]);
+    }
+
+    public function test_contacto_eliminado_devuelve_404(): void
+    {
+        $user = User::factory()->create();
+        $contact = Contact::factory()->create(['user_id' => $user->id]);
+        $contact->delete();
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->getJson("/api/v1/contacts/{$contact->id}");
+
+        $response->assertStatus(404);
+    }
+
+    public function test_usuario_puede_actualizar_la_direccion_de_su_contacto(): void
+    {
+        $user = User::factory()->create();
+        $contact = Contact::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->putJson("/api/v1/contacts/{$contact->id}", [
+                'address' => 'Carrera 7 # 12-34',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.address', 'Carrera 7 # 12-34');
     }
 
     public function test_la_eliminacion_de_contacto_realiza_un_borrado_suave(): void

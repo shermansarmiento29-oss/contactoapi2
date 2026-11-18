@@ -12,6 +12,7 @@ Route::prefix('v1')->group(function () {
     // Rutas protegidas con Sanctum
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/profile', [AuthController::class, 'profile']);
         Route::apiResource('contacts', ContactController::class);
     });
 });
